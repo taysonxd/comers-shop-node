@@ -1,21 +1,39 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../lib/prisma';
+import { env } from '../config/env';
+import jwt from 'jsonwebtoken';
+import { formatError } from '../utils/responseFormatter';
 
 export async function requireNextAuthSession(req: Request, res: Response, next: NextFunction) {
-	const token = req.cookies['__Secure-next-auth.session-token'] || req.cookies['next-auth.session-token'];
+	const accessToken = req.cookies['access-token'];
+	const refreshToken = req.cookies['refresh-token'];	
 		
-	if (!token) return res.status(401).json({ message: 'Unauthorized' });
+	if (!accessToken && !refreshToken)
+		return res.status(401).json(formatError({ message: 'Unauthorized' }, 401));
+	
+	let payload: any;
 
-	const session = await prisma.session.findUnique({
-		where: { sessionToken: token },
-		include: { user: true },
-	});
-
-	if (!session || session.expires < new Date()) {
-		return res.status(401).json({ message: 'Session expired' });
+	try {
+		const validateToken = refreshToken ?? accessToken;				
+		payload = jwt.verify(validateToken, env.jwtSecret);
+	} catch (err) {				
+		return res.status(401).json(formatError({ message: 'Invalid or expired token' }, 401));
 	}
 
-	req.user = { id: session.user.id, email: session.user.email || '' };
+	// Buscar el usuario en la tabla account
+	const account = await prisma.account.findFirst({
+		where: { userId: payload.sub },
+		include: { user: true },
+	});
+		
+	if (!account || !account.user)
+		return res.status(404).json(formatError({ message: 'User not found' }, 404));
+	
+	req.user = {
+		id: account.user.id,
+		email: account.user.email || '',
+	};
+
 	return next();
 }
 
