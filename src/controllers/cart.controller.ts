@@ -9,6 +9,7 @@ export const cartController = {
 		const userId = req.query.userId as string ?? null;
 		
 		const cart = await cartService.getCartItems(userId);
+		
 		res.status(201).json(cart);
 	},
 
@@ -36,12 +37,14 @@ export const cartController = {
 		
 		const { productId, quantity } = req.body as addCartItemPayload;
 		const cart = await cartService.addToCart(req.user!.id, productId, quantity);
+		
 		res.status(201).json(cart);
 	},
 	
 	// DELETE /cart/:productId
 	async remove(req: Request, res: Response) {
 		await cartService.removeFromCart(req.params.itemId);
+		
 		res.status(204).send();
 	},
 };

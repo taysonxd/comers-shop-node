@@ -1,7 +1,8 @@
+import { CartItem } from '@prisma/client';
 import { prisma } from '../lib/prisma';
 
 export const cartRepository = {
-	async add(userId: string, productId: number, quantity: number) {				
+	async add(userId: string, productId: number, quantity: number):Promise<CartItem> {				
 		return await prisma.cartItem.create({			
 			data: { userId, productId, quantity },
 			include: {
@@ -10,7 +11,7 @@ export const cartRepository = {
 		});		
 	},
 
-	async update(id: string, quantity: number) {				
+	async update(id: string, quantity: number):Promise<CartItem> {				
 		const cartItem = await prisma.cartItem.update({
 			where: { id },
 			data: {
@@ -24,7 +25,7 @@ export const cartRepository = {
 		return cartItem;
 	},
 
-	async getCartItems(userId: string | null) {
+	async getCartItems(userId: string | null):Promise<CartItem[]> {
 
 		let queryOptions = {}
 
@@ -36,7 +37,7 @@ export const cartRepository = {
 		return cartItem ?? [];
 	},
 
-	async getCartItemById(id: string) {
+	async getCartItemById(id: string):Promise<CartItem | null> {
 		const cartItem = await prisma.cartItem.findUnique({
 			where: { id }
 		});
@@ -44,7 +45,7 @@ export const cartRepository = {
 		return cartItem;
 	},
 
-	async getCartItem(userId: string, productId: number) {
+	async getCartItem(userId: string, productId: number):Promise<CartItem | null> {
 		const cartItem = await prisma.cartItem.findUnique({
 			where: { userId, productId },
 			include: {
@@ -55,7 +56,7 @@ export const cartRepository = {
 		return cartItem;
 	},
 
-	async remove( itemId: string) {
+	async remove( itemId: string):Promise<CartItem | undefined> {
 		const cartItem = await prisma.cartItem.findUnique({ where: { id: itemId } });
 				
 		if (!cartItem) return;

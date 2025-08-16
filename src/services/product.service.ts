@@ -1,16 +1,24 @@
+import { Product } from '@prisma/client';
 import { productRepository } from '../repositories/product.repository';
-import { Product } from '../interfaces/product';
+interface listedProducts {
+	items: Product[];
+	total: number;
+	page: number;
+	limit: number;
+}
 
 export const productService = {
+
 	async listProducts(params: {
 		page?: number;
 		limit?: number;
-		sort?: string; // e.g., "price:asc" or "price:desc"
+		sort?: string; // ej: "price:asc" or "price:desc"
 		q?: string;
 		minPrice?: number;
 		maxPrice?: number;
 		category?: string;
-	}) {
+	}):Promise<listedProducts> {
+
 		const page = params.page && params.page > 0 ? params.page : 1;
 		const limit = params.limit && params.limit > 0 ? params.limit : 12;
 		const skip = (page - 1) * limit;
@@ -54,20 +62,19 @@ export const productService = {
 		return { items, total, page, limit };
 	},
 
-	async getProductById(id: string) {
+	async getProductById(id: string):Promise<Product | null> {
 		return productRepository.findById(id);
 	},
 
-	async createProduct(data: any) {
-		// Aquí podrías validar reglas de negocio
+	async createProduct(data: any):Promise<Product> {		
 		return productRepository.create(data);
 	},
 
-	async updateProduct(id: string, data: any) {
+	async updateProduct(id: string, data: any):Promise<Product | null> {
 		return productRepository.update(id, data);
 	},
 
-	async deleteProduct(id: string) {
+	async deleteProduct(id: string):Promise<Boolean> {
 		return productRepository.delete(id);
 	},
 };

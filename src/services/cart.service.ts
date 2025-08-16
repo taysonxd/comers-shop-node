@@ -1,17 +1,8 @@
+import { CartItem } from '@prisma/client';
 import { cartRepository } from '../repositories/cart.repository';
 
-export interface CartItem {
-	productId: string;
-	quantity: number;
-}
-
-export interface Cart {
-	userId: string;
-	items: CartItem[];
-}
-
 export const cartService = {
-	async addToCart(userId: string, productId: number, quantity: number) {
+	async addToCart(userId: string, productId: number, quantity: number):Promise<CartItem> {
 		const existingCartItem = await cartRepository.getCartItem(userId, productId);
 		
 		if( existingCartItem )		
@@ -20,7 +11,7 @@ export const cartService = {
 		return cartRepository.add(userId, productId, quantity);
 	},
 
-	async updateCartItem(id: string, quantity: number) {
+	async updateCartItem(id: string, quantity: number):Promise<CartItem | undefined> {
 		const existingCartItem = await cartRepository.getCartItemById(id);
 		
 		if( !existingCartItem ) return;
@@ -30,11 +21,11 @@ export const cartService = {
 		return await cartRepository.update(existingCartItem.id, quantity);		
 	},
 
-	async getCartItems(userId: string | null) {
+	async getCartItems(userId: string | null):Promise<CartItem[]> {
 		return cartRepository.getCartItems(userId);
 	},
 
-	async removeFromCart(itemId: string) {				
+	async removeFromCart(itemId: string):Promise<CartItem | undefined> {				
 		return cartRepository.remove(itemId);
 	},
 };

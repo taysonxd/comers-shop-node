@@ -17,6 +17,7 @@ export const productRepository = {
 
 	async findById(id: string): Promise<Product | null> {
 		const numericId = Number(id);
+		
 		if (Number.isNaN(numericId)) return null;
 		return prisma.product.findUnique({ where: { id: numericId } });
 	},
