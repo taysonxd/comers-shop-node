@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { env } from '../config/env';
 
 const prisma = new PrismaClient();
 
@@ -22,11 +23,7 @@ async function main() {
     });
 
     // Por motivos de prueba el access token se establece con duracion de 7 dias    
-    const accessToken = jwt.sign(
-        { userId: user.id },
-        process.env.JWT_SECRET!,
-        { expiresIn: '7d' }
-    );
+    const accessToken = jwt.sign({ userId: user.id }, env.jwtSecret, { expiresIn: '7d', algorithm: 'HS256' });
 
     await prisma.account.upsert({
         where: {
@@ -47,11 +44,7 @@ async function main() {
         },
     });
     
-    const refreshToken = jwt.sign(
-        { userId: user.id },
-        process.env.JWT_SECRET!,
-        { expiresIn: '7d' }
-    );
+    const refreshToken = jwt.sign({ userId: user.id }, env.jwtSecret, { expiresIn: '7d', algorithm: 'HS256' });
 
     const refreshTokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 

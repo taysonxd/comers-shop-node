@@ -38,6 +38,7 @@ export const cartController = {
 			throw new AppError("Validation error", 400, parse.error);
 				
 		const { productId, quantity } = req.body as addCartItemPayload;
+				
 		const cart = await cartService.addToCart(req.user!.id, productId, quantity);
 		
 		res.status(201).json(formatSuccess(cart));

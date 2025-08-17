@@ -17,7 +17,7 @@ export const authController = {
   },
 
   async signout(req: Request, res: Response) {
-    const refreshToken = req.cookies?.['refresh-token'];
+    const refreshToken = req.cookies?.['refresh_token'];
   
     await authService.handleSignOut(refreshToken);
 

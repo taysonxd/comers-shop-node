@@ -46,7 +46,7 @@ export const cartRepository = {
 	},
 
 	async getCartItem(userId: string, productId: number):Promise<CartItem | null> {
-		const cartItem = await prisma.cartItem.findUnique({
+		const cartItem = await prisma.cartItem.findFirst({
 			where: { userId, productId },
 			include: {
 				product: true

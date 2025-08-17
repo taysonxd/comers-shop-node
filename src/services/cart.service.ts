@@ -2,7 +2,8 @@ import { CartItem } from '@prisma/client';
 import { cartRepository } from '../repositories/cart.repository';
 
 export const cartService = {
-	async addToCart(userId: string, productId: number, quantity: number):Promise<CartItem> {
+
+	async addToCart(userId: string, productId: number, quantity: number):Promise<CartItem> {		
 		const existingCartItem = await cartRepository.getCartItem(userId, productId);
 		
 		if( existingCartItem )		
