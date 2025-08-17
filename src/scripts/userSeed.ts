@@ -9,13 +9,15 @@ async function main() {
     const password = '123456';
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    await prisma.user.delete({ where: { email }});
+
     const user = await prisma.user.upsert({
         where: { email },
         update: {},
         create: {
-        email,
-        name: 'Usuario Demo',
-        password: hashedPassword,
+            email,
+            name: 'Usuario Demo',
+            password: hashedPassword,
         },
     });
 
