@@ -56,12 +56,10 @@ export const cartRepository = {
 		return cartItem;
 	},
 
-	async remove( itemId: string):Promise<CartItem | undefined> {
-		const cartItem = await prisma.cartItem.findUnique({ where: { id: itemId } });
+	async remove( itemId: string):Promise<CartItem | null> {				
+		const result = await prisma.cartItem.delete({ where: { id: itemId } });				
 				
-		if (!cartItem) return;
-		
-		return await prisma.cartItem.delete({ where: { id: itemId } });
+		return result
 	},
 };
 

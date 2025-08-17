@@ -44,10 +44,13 @@ export const cartController = {
 	},
 	
 	// DELETE /cart/:productId
-	async remove(req: Request, res: Response) {
-		await cartService.removeFromCart(req.params.itemId);
-		
-		res.status(204).json(formatSuccess(true));
+	async remove(req: Request, res: Response) {		
+		const response = await cartService.removeFromCart(req.params.itemId);
+				
+		if( !response )
+			throw new AppError("Article not found", 404);			
+
+		res.status(200).json(formatSuccess(true));		
 	},
 };
 

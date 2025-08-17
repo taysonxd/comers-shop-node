@@ -8,6 +8,7 @@ export async function requireNextAuthSession(req: Request, res: Response, next: 
 	const accessToken = req.cookies['access-token'];
 	const refreshToken = req.cookies['refresh-token'];	
 		
+		
 	if (!accessToken && !refreshToken)
 		return res.status(401).json(formatError({ message: 'Unauthorized' }, 401));
 	

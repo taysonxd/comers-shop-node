@@ -25,7 +25,12 @@ export const cartService = {
 		return cartRepository.getCartItems(userId);
 	},
 
-	async removeFromCart(itemId: string):Promise<CartItem | undefined> {				
+	async removeFromCart(itemId: string):Promise<CartItem | null> {				
+		const cartItem = await cartRepository.getCartItemById( itemId );
+								
+		if (!cartItem)
+			return null;
+
 		return cartRepository.remove(itemId);
 	},
 };
