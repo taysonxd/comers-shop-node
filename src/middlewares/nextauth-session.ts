@@ -4,6 +4,17 @@ import { env } from '../config/env';
 import jwt from 'jsonwebtoken';
 import { formatError } from '../utils/responseFormatter';
 
+declare global {
+	namespace Express {
+		interface Request {
+			user?: {
+				id: string;
+				email: string;
+			};
+		}
+	}
+}
+
 export async function requireNextAuthSession(req: Request, res: Response, next: NextFunction) {
 	let accessToken = req.cookies['access_token'];
 	const refreshToken = req.cookies['refresh_token'];	
