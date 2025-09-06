@@ -9,7 +9,7 @@ export const authController = {
     const { idToken } = req.body;
         
     if (!idToken)
-        throw new AppError("Missing idToken", 400);
+      throw new AppError("Missing idToken", 400);
 
     const { accessToken, refreshToken, user } = await authService.googleAuthFlow(idToken);
          
@@ -19,8 +19,11 @@ export const authController = {
   async signout(req: Request, res: Response) {
     const refreshToken = req.cookies?.['refresh_token'];
   
+    if (!refreshToken)
+      throw new AppError('No refresh token provided', 400);
+
     await authService.handleSignOut(refreshToken);
 
-    return res.status(200).json(formatSuccess(true));    
+    return res.status(204).json(formatSuccess(true));    
   }
 }

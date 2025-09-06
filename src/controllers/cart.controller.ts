@@ -12,7 +12,7 @@ export const cartController = {
 				
 		const cart = await cartService.getCartItems(userId);
 										
-		res.status(201).json(formatSuccess(cart));
+		res.status(200).json(formatSuccess(cart));
 	},
 
 	// PUT /cart
@@ -23,15 +23,16 @@ export const cartController = {
 		if( !parse.success)
 			throw new AppError("Validation error", 400, parse.error);			
 		
-		const { id, quantity } = req.body as updateCartItemPayload;
+		const { id, quantity } = parse.data as updateCartItemPayload;
+		
 		const cartItem = await cartService.updateCartItem(id, quantity);
 
-		res.status(201).json(formatSuccess(cartItem));
+		res.status(200).json(formatSuccess(cartItem));
 	},
 
 	// POST /cart
-	async add(req: Request, res: Response) {
-																
+	async add(req: Request, res: Response) {													
+				
 		const parse = cartItemSchema.safeParse(req.body);
 										
 		if( !parse.success)

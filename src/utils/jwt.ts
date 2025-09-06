@@ -5,11 +5,11 @@ import { env } from '../config/env';
 const JWT_SECRET = env.jwtSecret;
 
 export function createAccessJwt(user: User) {
-  return jwt.sign({ sub: user.id, email: user.email }, JWT_SECRET, { expiresIn: '1d', algorithm: "HS256" });
+  return jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '1d', algorithm: "HS256" });
 }
 
 export function createRefreshJwt(user: User) {
-  return jwt.sign({ sub: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d', algorithm: "HS256" });
+  return jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d', algorithm: "HS256" });
 }
 
 export function verifyJwt(token: string) {

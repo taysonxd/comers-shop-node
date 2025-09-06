@@ -1,20 +1,26 @@
 import { Request, Response } from 'express';
 import { productService } from '../services/product.service';
-import { productCreateSchema } from '../validators/product.schema';
+import { productCreateSchema, ProductFilterPayload, productFilterSchema } from '../validators/product.schema';
 import { AppError } from '../utils/AppError';
 import { formatSuccess } from '../utils/responseFormatter';
 
 export const productController = {
 	async list(req: Request, res: Response) {
+				
+		const parse = productFilterSchema.safeParse(req.query);
+
+		if( !parse.success)
+			throw new AppError("Validation error", 400, parse.error);					
+
 		const {
-			page = '1',
-			limit = '12',
+			page = 1,
+			limit = 12,
 			sort = 'price:desc',
 			q,
 			minPrice,
 			maxPrice,
 			category
-		} = req.query as Record<string, string | undefined>;
+		} = parse.data;
 
 		const products = await productService.listProducts({
 			page: Number(page),
@@ -26,7 +32,7 @@ export const productController = {
 			category,
 		});
 							
-		res.status(201).json(formatSuccess(products));
+		res.status(200).json(formatSuccess(products));
 	},
 
 	async create(req: Request, res: Response) {
@@ -41,5 +47,3 @@ export const productController = {
 	},
 
 };
-
-

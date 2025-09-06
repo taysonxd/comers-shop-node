@@ -33,16 +33,17 @@ export async function requireNextAuthSession(req: Request, res: Response, next: 
 	
 	try {
 		
-		const validateToken = refreshToken ?? accessToken;
+		const validateToken = refreshToken ?? accessToken;				
 		payload = jwt.verify(validateToken, env.jwtSecret, { algorithms: ['HS256'] });
-	} catch (err) {						
-		console.log({err, accessToken});
+		console.log(payload);
 		
+	} catch (err) {						
+		console.log({err, accessToken});		
 		return res.status(401).json(formatError({ message: 'Invalid or expired token' }, 401));
 	}
-	
+		
 	const account = await prisma.account.findFirst({
-		where: { userId: payload.sub },
+		where: { userId: payload.userId },
 		include: { user: true },
 	});
 		

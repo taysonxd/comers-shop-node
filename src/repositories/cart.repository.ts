@@ -1,14 +1,18 @@
 import { CartItem } from '@prisma/client';
 import { prisma } from '../lib/prisma';
+import { AppError } from '../utils/AppError';
 
 export const cartRepository = {
+
 	async add(userId: string, productId: number, quantity: number):Promise<CartItem> {				
-		return await prisma.cartItem.create({			
+		const cartItem = await prisma.cartItem.create({			
 			data: { userId, productId, quantity },
 			include: {
 				product: true
 			}
 		});		
+
+		return cartItem;
 	},
 
 	async update(id: string, quantity: number):Promise<CartItem> {				
@@ -32,9 +36,9 @@ export const cartRepository = {
 		if( userId )
 			queryOptions = { where: { userId } };
 
-		const cartItem = await prisma.cartItem.findMany({ ...queryOptions, include: { product: true }, orderBy: { id: 'asc' } });
+		const cartItems = await prisma.cartItem.findMany({ ...queryOptions, include: { product: true }, orderBy: { id: 'asc' } });
 
-		return cartItem ?? [];
+		return cartItems;
 	},
 
 	async getCartItemById(id: string):Promise<CartItem | null> {
@@ -56,10 +60,17 @@ export const cartRepository = {
 		return cartItem;
 	},
 
-	async remove( itemId: string):Promise<CartItem | null> {				
-		const result = await prisma.cartItem.delete({ where: { id: itemId } });				
-				
-		return result
+	async remove( itemId: string): Promise<CartItem | undefined> {				
+		try {			
+			const result = await prisma.cartItem.delete({ where: { id: itemId } });
+
+			return result;
+		} catch (error: any) {
+			if (error.code === 'P2025') {
+				console.error(error);
+				throw new AppError("Cart item not found", 404);
+			}				
+		}
 	},
 };
 

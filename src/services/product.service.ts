@@ -62,19 +62,19 @@ export const productService = {
 		return { items, total, page, limit };
 	},
 
-	async getProductById(id: string):Promise<Product | null> {
+	async getProductById(id: string): Promise<Product | null> {
 		return productRepository.findById(id);
 	},
 
-	async createProduct(data: any):Promise<Product> {		
+	async createProduct(data: any): Promise<Product> {		
 		return productRepository.create(data);
 	},
 
-	async updateProduct(id: string, data: any):Promise<Product | null> {
+	async updateProduct(id: string, data: any): Promise<Product | null> {
 		return productRepository.update(id, data);
 	},
 
-	async deleteProduct(id: string):Promise<Boolean> {
+	async deleteProduct(id: string): Promise<Boolean> {
 		return productRepository.delete(id);
 	},
 };

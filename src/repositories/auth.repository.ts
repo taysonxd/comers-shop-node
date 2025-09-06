@@ -1,13 +1,21 @@
 import { User } from "@prisma/client";
 import { prisma } from "../lib/prisma";
+import { AppError } from "../utils/AppError";
 
 export const authRepository = {
 
   async userUpsert ({ email, name, picture }: {email?: string, name?: string, picture?: string}):Promise<User> {
     return await prisma.user.upsert({
       where: { email },
-      update: { name, image: picture },
-      create: { email: email!, name, image: picture },
+      update: {
+        name,
+        image: picture
+      },
+      create: {
+        email: email!,
+        name,
+        image: picture
+      },
     });
   },
 
@@ -30,7 +38,7 @@ export const authRepository = {
     });
   },
   
-  async generateRefreshToken (userId: string, token: string) {
+  async storeRefreshToken (userId: string, token: string) {
         
     await prisma.refreshToken.deleteMany({ where: { userId } });
   
@@ -46,6 +54,15 @@ export const authRepository = {
   },
 
   async revokeRefreshToken (token: string) {
-    return prisma.refreshToken.delete({ where: {  token } });
+    try {
+      prisma.refreshToken.delete({ where: {  token } });
+      
+      return true;
+    } catch (error: any) {
+      console.error(error);
+      if( error.code === 'P2025' ) {
+        throw new AppError("token not found in database", 404);
+      }
+    }    
   }
 };

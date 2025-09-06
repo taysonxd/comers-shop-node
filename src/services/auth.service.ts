@@ -27,16 +27,12 @@ export const authService = {
     const accessToken = createAccessJwt(user);
     const refreshToken = createRefreshJwt(user);
     
-    await authRepository.generateRefreshToken(user.id, refreshToken);
+    await authRepository.storeRefreshToken(user.id, refreshToken);
   
     return { accessToken, refreshToken, user };
   },
 
-  async handleSignOut (refreshToken: string) {
-
-    if (!refreshToken)
-      throw new Error('No refresh token provided');
-
+  async handleSignOut (refreshToken: string) {    
     await authRepository.revokeRefreshToken(refreshToken);
 
     return true;
