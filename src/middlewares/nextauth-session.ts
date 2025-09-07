@@ -35,8 +35,6 @@ export async function requireNextAuthSession(req: Request, res: Response, next: 
 		
 		const validateToken = refreshToken ?? accessToken;				
 		payload = jwt.verify(validateToken, env.jwtSecret, { algorithms: ['HS256'] });
-		console.log(payload);
-		
 	} catch (err) {						
 		console.log({err, accessToken});		
 		return res.status(401).json(formatError({ message: 'Invalid or expired token' }, 401));

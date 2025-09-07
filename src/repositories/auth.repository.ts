@@ -1,10 +1,16 @@
-import { User } from "@prisma/client";
+import { Prisma, User } from "@prisma/client";
 import { prisma } from "../lib/prisma";
 import { AppError } from "../utils/AppError";
 
+type UserWithTokens = Prisma.UserGetPayload<{
+  include: {
+    refreshTokens: true
+  }
+}>;
+
 export const authRepository = {
 
-  async userUpsert ({ email, name, picture }: {email?: string, name?: string, picture?: string}):Promise<User> {
+  async userUpsert ({ email, name, picture }: {email?: string, name?: string, picture?: string}):Promise<UserWithTokens> {
     return await prisma.user.upsert({
       where: { email },
       update: {
@@ -16,10 +22,13 @@ export const authRepository = {
         name,
         image: picture
       },
+      include: {
+        refreshTokens: true
+      }
     });
   },
 
-  async accountUpsert (sub: string, idToken: string, user: User, provider: 'google') {
+  async accountUpsert (sub: string, access_token: string, user: User, provider: 'google') {
     return await prisma.account.upsert({
       where: {
         provider_providerAccountId: {
@@ -27,20 +36,18 @@ export const authRepository = {
           providerAccountId: sub,
         },
       },
-      update: { access_token: idToken },
+      update: { access_token },
       create: {
         userId: user.id,
         provider,
         type: 'oauth',
         providerAccountId: sub,
-        access_token: idToken,
+        access_token,
       },
     });
   },
   
-  async storeRefreshToken (userId: string, token: string) {
-        
-    await prisma.refreshToken.deleteMany({ where: { userId } });
+  async storeRefreshToken (userId: string, token: string) {    
   
     await prisma.refreshToken.create({
       data: {
@@ -50,12 +57,20 @@ export const authRepository = {
       },
     });
     
-    return token;
+    return true;
   },
 
-  async revokeRefreshToken (token: string) {
+  async revokeRefreshToken ({token, userId }: { token?: string; userId?: string }) {
     try {
-      prisma.refreshToken.delete({ where: {  token } });
+
+        await prisma.refreshToken.deleteMany({
+          where: {
+            OR: [
+              {token},
+              {userId}
+            ]
+          }
+        });
       
       return true;
     } catch (error: any) {

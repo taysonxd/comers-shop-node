@@ -16,6 +16,23 @@ export const authController = {
     res.status(200).json(formatSuccess({user, refreshToken, accessToken}));
   },
 
+  async refreshAccessToken(req: Request, res: Response) {
+    const refreshToken = req.cookies?.['refresh_token'];
+
+    if (!refreshToken)
+      throw new AppError('No refresh token provided', 400);
+
+    try {
+      
+      const { accessToken, refreshToken: newRefreshToken } = await authService.refreshAccessToken(refreshToken);
+
+      return res.status(201).json(formatSuccess({ accessToken, refreshToken: newRefreshToken }));
+    } catch (error: any) {
+      console.error(error);
+      throw new AppError('Error happened processing new token', 500, error);
+    }
+  },
+
   async signout(req: Request, res: Response) {
     const refreshToken = req.cookies?.['refresh_token'];
   
