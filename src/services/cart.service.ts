@@ -8,7 +8,7 @@ export const cartService = {
 		const existingCartItem = await cartRepository.getCartItem(userId, productId);
 		
 		if( existingCartItem )		
-			return await cartRepository.update(existingCartItem.id, existingCartItem.quantity + 1);
+			return await cartRepository.update(existingCartItem.id, existingCartItem.quantity + quantity);
 
 		return cartRepository.add(userId, productId, quantity);
 	},

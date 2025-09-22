@@ -1,28 +1,21 @@
 import { OAuth2Client } from "google-auth-library";
 
-import { createAccessJwt, createRefreshJwt, verifyJwt } from "../utils/jwt";
 import { AppError } from "../utils/AppError";
 import { authRepository } from "../repositories/auth.repository";
-import jwt from 'jsonwebtoken';
-import { env } from "../config/env";
 
 export const authService = {
   
-  async generateTokens(user: { id: string; email: string }) {
-        
-    const refreshToken = createRefreshJwt(user);
-    const accessToken = createAccessJwt(user);
+  async refreshAccessToken(refreshToken: string) {
+    const tokenData = await authRepository.searchRefreshToken(refreshToken);
     
-    await authRepository.storeRefreshToken(user.id, refreshToken);    
-
-    return { accessToken, refreshToken };
-  },
-
-  async refreshAccessToken(user: { id: string; email: string }, refreshToken: string) {    	    
+    if( !tokenData )
+      throw new AppError('Token invalid', 400);
+    
+    const { user } = tokenData    
     await authRepository.revokeRefreshToken({ token: refreshToken });
     
-    const { accessToken, refreshToken: newRefreshToken } = await this.generateTokens(user);
-
+    const { accessToken, refreshToken: newRefreshToken } = await authRepository.generateTokens(user);
+    
     return { accessToken, refreshToken: newRefreshToken };    
   },
 
@@ -39,20 +32,18 @@ export const authService = {
       throw new AppError("Invalid Google token", 500);
   
     const { sub, email, name, picture } = payload;
-  
-    const user = await authRepository.userUpsert({ email, name, picture });
-    await authRepository.accountUpsert(sub, idToken, user, 'google');
-        
-    const { token = '' } = user.refreshTokens[0] ?? {};    
-    const { accessToken, refreshToken } = !verifyJwt(token) && !user.refreshTokens
-      ? await this.generateTokens(user)
-      : await this.refreshAccessToken(user, token);
+
+    const {
+      accessToken,
+      refreshToken,
+      user
+    } = await authRepository.userAccountUpsert({ email, name, picture }, { sub, provider: 'google' });    
         
     return { accessToken, refreshToken, user };    
   },
 
-  async handleSignOut (refreshToken: string) {    
-    await authRepository.revokeRefreshToken({ token: refreshToken });
+  async handleSignOut (userId: string) {    
+    await authRepository.revokeRefreshToken({ userId });
 
     return true;
   }

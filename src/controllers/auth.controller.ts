@@ -18,12 +18,11 @@ export const authController = {
 
   async refreshAccessToken(req: Request, res: Response) {
     const refreshToken = req.cookies?.['refresh_token'];
-
+        
     if (!refreshToken)
       throw new AppError('No refresh token provided', 400);
 
-    try {
-      
+    try {            
       const { accessToken, refreshToken: newRefreshToken } = await authService.refreshAccessToken(refreshToken);
 
       return res.status(201).json(formatSuccess({ accessToken, refreshToken: newRefreshToken }));
@@ -33,14 +32,10 @@ export const authController = {
     }
   },
 
-  async signout(req: Request, res: Response) {
-    const refreshToken = req.cookies?.['refresh_token'];
-  
-    if (!refreshToken)
-      throw new AppError('No refresh token provided', 400);
-
-    await authService.handleSignOut(refreshToken);
-
-    return res.status(204).json(formatSuccess(true));    
+  async signout(req: Request, res: Response) {    
+       
+    await authService.handleSignOut(req.user!.id);
+        
+    return res.status(204).json(formatSuccess(true));
   }
 }

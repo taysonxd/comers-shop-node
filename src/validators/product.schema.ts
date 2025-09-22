@@ -9,17 +9,23 @@ export const productCreateSchema = z.object({
 	rating: z.object({ rate: z.number().min(0), count: z.number().int().min(0) }),
 });
 
+const validationDigits = { message: 'Debe contener solo dígitos' };
 export const productFilterSchema = z.object({
-	page: z.number().positive().optional(),
-	limit: z.number().positive().optional(),
+	page: z.string().regex(/^\d+$/, validationDigits).optional(),
+	limit: z.string().regex(/^\d+$/, validationDigits).optional(),
 	sort: z.enum(["price:asc", "price:desc"]).optional(),
 	q: z.string().optional(),
-	minPrice: z.number().positive().optional(),
-	maxPrice: z.number().positive().optional(),
+	minPrice: z.string().regex(/^\d+$/, validationDigits).optional(),
+	maxPrice: z.string().regex(/^\d+$/, validationDigits).optional(),
 	category: z.string().optional(),
+});
+
+export const productIdSchema = z.object({
+	id: z.string().min(1)
 });
 
 export type ProductCreatePayload = z.infer<typeof productCreateSchema>;
 export type ProductFilterPayload = z.infer<typeof productFilterSchema>;
+export type ProductIdPayload = z.infer<typeof productIdSchema>
 
 

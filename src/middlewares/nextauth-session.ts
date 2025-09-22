@@ -31,8 +31,7 @@ export async function requireNextAuthSession(req: Request, res: Response, next: 
 	
 	let payload: any;
 	
-	try {
-		
+	try {		
 		const validateToken = refreshToken ?? accessToken;				
 		payload = jwt.verify(validateToken, env.jwtSecret, { algorithms: ['HS256'] });
 	} catch (err) {						

@@ -6,6 +6,7 @@ import { asyncHandler } from '../middlewares/asyncHandler';
 const router = Router();
 
 router.get('/', asyncHandler(productController.list));
+router.get('/:id', asyncHandler(productController.show));
 router.post('/', requireNextAuthSession, asyncHandler(productController.create));
 
 export default router;
