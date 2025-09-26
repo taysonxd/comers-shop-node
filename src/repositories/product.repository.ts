@@ -1,6 +1,6 @@
 import { Prisma, Product } from '@prisma/client';
 import { prisma } from '../lib/prisma';
-import type { Rating } from '../interfaces/product';
+import type { Rating } from '../interfaces/product.interface';
 
 export const productRepository = {
 
@@ -62,5 +62,3 @@ export const productRepository = {
 		return true
 	},
 };
-
-

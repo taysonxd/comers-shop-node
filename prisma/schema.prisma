@@ -40,6 +40,9 @@ model User {
   accounts Account[]
   refreshTokens RefreshToken[]
   cartItems CartItem[]
+  userAddress UserAddress?
+
+  Order Order[]
 }
 
 model RefreshToken {
@@ -67,12 +70,14 @@ model Product {
 	title       String
 	price       Decimal
 	description String
-	category    Category
 	image       String
 	rating      Json
 	createdAt   DateTime @default(now())
 	updatedAt   DateTime @updatedAt
+
+	category    Category
 	cartItems   CartItem[]
+  orderItem OrderItem[]
 }
 
 model CartItem {
@@ -93,6 +98,84 @@ enum Category {
 	jewelery
 	men_s_clothing @map("men's clothing")
 	women_s_clothing @map("women's clothing")
+}
+
+model Country {
+  id   String @id
+  name String
+
+  UserAddress  UserAddress[]
+  OrderAddress OrderAddress[]
+}
+
+model UserAddress {
+  id         String  @id @default(uuid())
+  firstName  String
+  lastName   String
+  address    String
+  address2   String?
+  postalCode String
+  phone      String
+  city       String
+
+  // Relaciones
+  country   Country @relation(fields: [countryId], references: [id])
+  countryId String
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique
+}
+
+model Order {
+  id           String    @id @default(uuid())
+  transactionId String?
+  subTotal     Float
+  tax          Float
+  total        Float
+  itemsInOrder Int
+  isPaid       Boolean @default(false)
+  paidAt       DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  OrderItem    OrderItem[]
+  OrderAddress OrderAddress?
+}
+
+model OrderItem {
+  id       String @id @default(uuid())
+  quantity Int
+  price    Float  
+
+  // Relaciones
+  order   Order  @relation(fields: [orderId], references: [id])
+  orderId String
+
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+}
+
+model OrderAddress {
+  id         String  @id @default(uuid())
+  firstName  String
+  lastName   String
+  address    String
+  address2   String?
+  postalCode String
+  city       String
+  phone      String
+
+  // Relaciones
+  country   Country @relation(fields: [countryId], references: [id])
+  countryId String
+
+  Order   Order  @relation(fields: [orderId], references: [id])
+  orderId String @unique
 }
 
 

@@ -3,15 +3,15 @@ import { prisma } from "../lib/prisma";
 import { AppError } from "../utils/AppError";
 import { DefaultArgs } from "@prisma/client/runtime/library";
 import { createAccessJwt, createRefreshJwt, verifyJwt } from "../utils/jwt";
+import { PrismaClients, PrismaTransactionClient } from "../interfaces/prisma.interface";
 
-type PrismaTransactionClient = Omit<PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>, "$connect" | "$disconnect" | "$on" | "$transaction" | "$extends">
 type UserWithTokens = Prisma.UserGetPayload<{
   include: {
     refreshTokens: true
   }
 }>;
-interface AuthRepositoryType {
-  prismaClient: PrismaClient | PrismaTransactionClient;
+interface AuthRepository {
+  prismaClient: PrismaClients;
   setClient: (tx: PrismaTransactionClient) => void
   getClient: () => PrismaTransactionClient | null;
   generateTokens: (user: { id: string; email: string }) => any;
@@ -30,9 +30,7 @@ interface AuthRepositoryType {
   revokeRefreshToken: (param: { token?: string; userId?: string }) => Promise<Boolean | undefined>
 }
 
-
-
-export const authRepository: AuthRepositoryType = {
+export const authRepository: AuthRepository = {
 
   prismaClient: prisma,
   setClient(tx) {

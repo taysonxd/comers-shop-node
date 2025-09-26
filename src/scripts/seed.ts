@@ -1,5 +1,6 @@
 import { Category, Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma';
+import { countries } from '../seed/seed-countries';
 
 type FakeStoreProduct = {
 	id: number;
@@ -40,6 +41,10 @@ async function main() {
 	await prisma.cartItem.deleteMany();	
 	await prisma.product.deleteMany();
 
+	await prisma.country.deleteMany();
+
+	await prisma.country.createMany({ data: countries });
+
 	const rows = data.map((p) => ({
 		title: p.title,
 		price: new Prisma.Decimal(p.price),
@@ -48,7 +53,7 @@ async function main() {
 		image: p.image,
 		rating: p.rating as unknown as Prisma.InputJsonValue,
 	}));
-
+	
 	const created = await prisma.product.createMany({ data: rows });
 	console.log(`Seed complete. Inserted products: ${created.count}`);
 }

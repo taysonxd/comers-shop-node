@@ -26,8 +26,9 @@ export const cartController = {
 		const { id, quantity } = parse.data as updateCartItemPayload;
 		
 		const cartItem = await cartService.updateCartItem(id, quantity);
-
-		res.status(200).json(formatSuccess(cartItem));
+		const { product, ...rest } = cartItem;
+				
+		res.status(200).json(formatSuccess({ ...rest, price: Number(product.price) }));
 	},
 
 	// POST /cart
@@ -40,9 +41,10 @@ export const cartController = {
 				
 		const { productId, quantity } = req.body as addCartItemPayload;
 				
-		const cart = await cartService.addToCart(req.user!.id, productId, quantity);
-		
-		res.status(201).json(formatSuccess(cart));
+		const cartItem = await cartService.addToCart(req.user!.id, productId, quantity);
+		const { product, ...rest } = cartItem;
+				
+		res.status(201).json(formatSuccess({ ...rest, price: Number(product.price) }));
 	},
 	
 	// DELETE /cart/:productId

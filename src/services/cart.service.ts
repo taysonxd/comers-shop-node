@@ -1,10 +1,10 @@
 import { CartItem } from '@prisma/client';
-import { cartRepository } from '../repositories/cart.repository';
+import { CartItemWithProduct, cartRepository } from '../repositories/cart.repository';
 import { AppError } from '../utils/AppError';
 
 export const cartService = {
 
-	async addToCart(userId: string, productId: number, quantity: number): Promise<CartItem> {		
+	async addToCart(userId: string, productId: number, quantity: number): Promise<CartItemWithProduct> {		
 		const existingCartItem = await cartRepository.getCartItem(userId, productId);
 		
 		if( existingCartItem )		
@@ -13,7 +13,7 @@ export const cartService = {
 		return cartRepository.add(userId, productId, quantity);
 	},
 
-	async updateCartItem(id: string, quantity: number): Promise<CartItem | undefined> {
+	async updateCartItem(id: string, quantity: number): Promise<CartItemWithProduct> {
 		const existingCartItem = await cartRepository.getCartItemById(id);
 		
 		if( !existingCartItem )
@@ -26,10 +26,25 @@ export const cartService = {
 	},
 
 	async getCartItems(userId: string | null): Promise<CartItem[]> {
-		return cartRepository.getCartItems(userId);
+		const cart = await cartRepository.getCartItems(userId);
+		const cartItems = cart.map(item => {
+			const { product, ...rest } = item;
+			const { title, image, price } = product;
+
+			return {
+				...rest,
+				product: {					
+					image,
+					title,
+					price: Number(price),
+				}
+			};
+		});
+
+		return cartItems;
 	},
 
-	async removeFromCart(itemId: string): Promise<CartItem | null> {				
+	async removeFromCart(itemId: string): Promise<CartItem | undefined> {				
 		const cartItem = await cartRepository.getCartItemById( itemId );
 								
 		if( !cartItem )
